@@ -1,0 +1,12 @@
+epochs: 100
+batch_size: 4
+gradient_accumulations: 2
+model_def: "config/yolov3.cfg"
+data_config: "config/coco.data"
+pretrained_weights: ''
+n_cpu: 8
+img_size: 256
+checkpoint_interval: 1
+evaluation_interval: 1
+compute_map: False
+multiscale_training: True
