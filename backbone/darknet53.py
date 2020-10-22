@@ -5,6 +5,7 @@
 # @Software: PyCharm
 from collections import OrderedDict
 
+import torch
 import torch.nn as nn
 
 
@@ -147,3 +148,12 @@ class DarkNet(nn.Module):
 
         return out3, out4, out5
 
+
+def darknet53(pretrained, **kwargs):
+    model = DarkNet([1, 2, 8, 8, 4])
+    if pretrained:  # 如果不用，则False，如果用，则必须是权重路径
+        if isinstance(pretrained, str):
+            model.load_state_dict(torch.load(pretrained))
+        else:
+            raise Exception("darknet request pretrained path. got [{}]".format(pretrained))
+    return model
