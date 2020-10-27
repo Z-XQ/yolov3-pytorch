@@ -12,6 +12,7 @@ import torch.nn as nn
 class Conv2dBatchLeaky(nn.Module):
     """ This convenience layer groups a 2D convolution, a batchnorm and a leaky ReLU.
     They are executed in a sequential manner.
+    对应左图中Convolutional
     DarkNet最小子模块
     只有stride=1控制特征缩放
 
@@ -94,25 +95,26 @@ class DarkNet(nn.Module):
         self.conv = Conv2dBatchLeaky(in_channels=3, out_channels=start_channel, kernel_size=3, stride=1)  # 高宽不变
 
         # 定义5个模块，每个模块前面都有一个卷积用于高宽的下采样，同时通道数翻倍。每个模块不会改变特征维度，包括h,w,c。
-        self.conv1 = Conv2dBatchLeaky(in_channels=start_channel, out_channels=start_channel * 2, kernel_size=3,
-                                      stride=2)  # 32->64
-        self.layer1 = self._build_layer(input_channels=self.start_channel * 2, num_res_block=layers[0])  # 64->64
+        self.conv1 = Conv2dBatchLeaky(in_channels=start_channel, out_channels=start_channel * 2, kernel_size=3, stride=2)  # 32->64
+        self.layer1 = self._build_layer(input_channels=start_channel * 2, num_res_block=layers[0])  # 64->64
 
-        self.conv2 = Conv2dBatchLeaky(in_channels=start_channel * 2, out_channels=start_channel * 4, kernel_size=3,
-                                      stride=2)  # ->128
+        self.conv2 = Conv2dBatchLeaky(in_channels=start_channel * 2, out_channels=start_channel * 4, kernel_size=3, stride=2)  # ->128
         self.layer2 = self._build_layer(input_channels=start_channel * 4, num_res_block=layers[1])  # 128->128
 
-        self.conv3 = Conv2dBatchLeaky(in_channels=start_channel * 4, out_channels=start_channel * 8, kernel_size=3,
-                                      stride=2)  # ->256
+        self.conv3 = Conv2dBatchLeaky(in_channels=start_channel * 4, out_channels=start_channel * 8, kernel_size=3, stride=2)  # ->256
         self.layer3 = self._build_layer(input_channels=start_channel * 8, num_res_block=layers[2])  # 256->256
 
-        self.conv4 = Conv2dBatchLeaky(in_channels=start_channel * 8, out_channels=start_channel * 16, kernel_size=3,
-                                      stride=2)  # ->512
+        self.conv4 = Conv2dBatchLeaky(in_channels=start_channel * 8, out_channels=start_channel * 16, kernel_size=3, stride=2)  # ->512
         self.layer4 = self._build_layer(input_channels=start_channel * 16, num_res_block=layers[3])  # 512->512
 
-        self.conv4 = Conv2dBatchLeaky(in_channels=start_channel * 16, out_channels=start_channel * 32, kernel_size=3,
-                                      stride=2)  # ->1024
+        self.conv5 = Conv2dBatchLeaky(in_channels=start_channel * 16, out_channels=start_channel * 32, kernel_size=3, stride=2)  # ->1024
         self.layer5 = self._build_layer(input_channels=start_channel * 32, num_res_block=layers[4])  # 1024->1024
+
+        self.output_channels = [start_channel * 2,  # 64  layer1
+                                start_channel * 4,  # 128 layer2
+                                start_channel * 8,  # 256
+                                start_channel * 16,  # 512
+                                start_channel * 32, ]  # 1024
 
     @staticmethod
     def _build_layer(input_channels, num_res_block=1):
@@ -125,28 +127,28 @@ class DarkNet(nn.Module):
         """
         layers = []
         for i in range(0, num_res_block):
-            layers.append(ResBlock(in_channels=input_channels))
+            layers.append(("res_block_{}".format(i), ResBlock(in_channels=input_channels)))
         return nn.Sequential(OrderedDict(layers))
 
     def forward(self, x):
-        x = self.conv(x)  # 只改变c, c: 3->32
+        x = self.conv(x)  # [b,3,416,416] -> [b,32,416,416]
 
-        x = self.conv1(x)  # h,w/2, c: ->64
+        x = self.conv1(x)  # [b,32,416,416] -> [b,64,208,208]
         x = self.layer1(x)  # 维度不变
 
-        x = self.con2(x)  # h,w/4, c: ->128
+        x = self.conv2(x)  # [b,64,208,208] -> [b,128,104,104]
         x = self.layer2(x)
 
-        x = self.con3(x)  # h,w/8, c: ->256
+        x = self.conv3(x)  # [b,128,104,104] -> [b,256,52,52]
         out3 = self.layer3(x)
 
-        out4 = self.con4(out3)  # h,w/16, c: ->512
+        out4 = self.conv4(out3)  # [b,256,52,52] -> [b,512,26,26]
         out4 = self.layer4(out4)
 
-        out5 = self.con5(out4)  # h,w/32, c: ->1024
+        out5 = self.conv5(out4)  # [b,512,26,26] -> [b,1024,13,13]
         out5 = self.layer5(out5)
 
-        return out3, out4, out5
+        return out3, out4, out5  # [b,256,52,52], [b,512,26,26], [b,1024,13,13]
 
 
 def darknet53(pretrained, **kwargs):

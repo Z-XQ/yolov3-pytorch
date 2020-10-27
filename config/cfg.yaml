@@ -10,3 +10,7 @@ checkpoint_interval: 1
 evaluation_interval: 1
 compute_map: False
 multiscale_training: True
+
+yolo:
+  anchor: [10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326]
+  classes: 80
