@@ -53,7 +53,8 @@ class YOLOLoss(nn.Module):
         :param anchors: list. [(w1, h1), (w2, h2), (w3, h3)]. 在特征图尺度上的anchor
         :param in_w: 预测的特征图宽
         :param in_h: 预测的特征图高
-        :param ignore_threshold: 计算标注的gt_bbox和3个anchor_box之间的iou，找到比较合适的anchor用于训练
+        :param ignore_threshold: 计算标注的gt_bbox和3个anchor_box之间的iou，找到比较合适的anchor用于训练；
+        长方形的目标，最好不要用竖直的anchor训练。
         :return:
         """
 
@@ -114,3 +115,9 @@ class YOLOLoss(nn.Module):
                 anchor_ious = bbox_iou(gt_box, anchor_box)  # gt_box.shape: (1,4). anchor_box.shape: (3,4)
                 # Where the overlap is larger than threshold set mask to zero (ignore)
                 noobj_mask[b, anchor_ious > ignore_threshold, gj, gi] = 0
+                # Find the best matching anchor box
+                best_anchor_index = np.argmax(anchor_ious)
+
+                # masks
+                mask[b, best_anchor_index, gj, gi] = 1  # 最合适的anchor索引
+                tx[b, best_anchor_index, gj, gi] =
