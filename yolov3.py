@@ -24,7 +24,7 @@ class Conv2dBlock5L(nn.Module):
         :param out_channels: list. [c1, c2]. 通道数就在c1和c2之间变化，最后输出c2通道数
         然后5个卷积的通道数就在in_channels和in_channels//2两者间变化
         """
-        super(Conv2DBlock5L, self).__init__()
+        super(Conv2dBlock5L, self).__init__()
         conv = Conv2dBatchLeaky(in_channels=in_channels, out_channels=out_channels[0], kernel_size=1, stride=1)  # 降维，减少计算量
 
         conv1 = Conv2dBatchLeaky(in_channels=out_channels[0], out_channels=out_channels[1], kernel_size=3, stride=1)
@@ -134,8 +134,8 @@ class YOLOv3(nn.Module):
 
 
 if __name__ == '__main__':
-    cfg_dict = yaml.load(open('./config/cfg.yaml'))
+    cfg_dict = yaml.load(open('./config/cfg.yaml'), Loader=yaml.SafeLoader)
     yolo_module = YOLOv3(config=cfg_dict)
     x = torch.Tensor(4, 3, 416, 416)
     output3, output4, output5 = yolo_module(x)
-    print()
+    print(output3.shape, output4.shape, output5.shape)
