@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/10/22 下午10:10
 # @Author  : zxq
-# @File    : yolov3.py
+# @File    : yolov3_module.py
 # @Software: PyCharm
 import torch
 import torch.nn as nn

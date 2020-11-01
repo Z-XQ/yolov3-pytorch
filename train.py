@@ -1,7 +1,7 @@
 import torch
 import yaml
 
-from yolov3 import YOLOv3
+from yolov3_module import YOLOv3
 
 if __name__ == '__main__':
     cfg_dict = yaml.load(open('./config/cfg.yaml'), Loader=yaml.SafeLoader)

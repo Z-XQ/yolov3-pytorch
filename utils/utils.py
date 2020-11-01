@@ -193,7 +193,11 @@ def bbox_wh_iou(wh1, wh2):
 
 def bbox_iou(box1, box2, x1y1x2y2=True):
     """
-    Returns the IoU of two bounding boxes
+
+    :param box1: torch.Size([num_bbox, 4])
+    :param box2: torch.Size([num_bbox, 4])
+    :param x1y1x2y2: bbox的坐标是否为xyxy形式，默认是xyxy形式
+    :return: The IoU of two bounding boxes
     """
     if not x1y1x2y2:
         # Transform from center and width to exact coordinates
