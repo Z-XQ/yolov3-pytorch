@@ -13,6 +13,7 @@ import numpy as np
 from utils.utils import bbox_iou
 
 
+#
 class YOLOLoss(nn.Module):
     def __init__(self, image_size, num_classes, anchors):
         super(YOLOLoss, self).__init__()
