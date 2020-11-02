@@ -13,7 +13,6 @@ import numpy as np
 from utils.utils import bbox_iou
 
 
-#
 class YOLOLoss(nn.Module):
     def __init__(self, image_size, num_classes, anchors):
         super(YOLOLoss, self).__init__()
@@ -58,7 +57,7 @@ class YOLOLoss(nn.Module):
         w = prediction[..., 2].cuda()  # -> [b, num_anchors,h,w]
         h = prediction[..., 3].cuda()  # -> [b, num_anchors,h,w]
         conf = torch.sigmoid(prediction[..., 4]).cuda()  # 目标概率
-        pred_cls = prediction[..., 5:].cuda()  # [b, num_anchors, h,w, num_classes]类别概率
+        pred_cls = torch.sigmoid(prediction[..., 5:].cuda())  # [b, num_anchors, h,w, num_classes]类别概率
 
         # train
         if targets is not None:
