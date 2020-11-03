@@ -57,7 +57,7 @@ class YOLOLoss(nn.Module):
         w = prediction[..., 2].cuda()  # -> [b, num_anchors,h,w]
         h = prediction[..., 3].cuda()  # -> [b, num_anchors,h,w]
         conf = torch.sigmoid(prediction[..., 4]).cuda()  # 目标概率
-        pred_cls = torch.sigmoid(prediction[..., 5:].cuda())  # [b, num_anchors, h,w, num_classes]类别概率
+        pred_cls = torch.sigmoid(prediction[..., 5:].cuda())  # [b, num_anchors, h,w, num_classes]类别概率，bce loss
 
         # train
         if targets is not None:
@@ -80,6 +80,7 @@ class YOLOLoss(nn.Module):
             loss_conf = self.bce_loss(conf * mask, mask) + 0.5 * self.bce_loss(conf * noobj_mask, noobj_mask * 0.0)
             # 3 class loss
             # pred_cls.shape: [2,3,52,52,80], mask.shape: [2,3,52,52]
+            # 每个目标的类别信息都是一个80维向量，标注类别的对应维度的值是1，预测的值归一化到0-1之间
             loss_cls = self.bce_loss(pred_cls[mask == 1], tcls[mask == 1])  # pred_cls[mask == 1].shape: [num_obj, 80]
 
             #  total loss = losses * weight

@@ -1,16 +1,20 @@
 epochs: 100
-batch_size: 4
+
 gradient_accumulations: 2
 model_def: "config/yolov3.cfg"
 data_config: "config/coco.data"
 pretrained_weights: ''
 n_cpu: 8
-img_size: 256
+
 checkpoint_interval: 1
 evaluation_interval: 1
 compute_map: False
 multiscale_training: True
 
+img_size: (256, 256)
+num_classes: 80
+train_path: 'data/coco/trainvalno5k.txt'
+batch_size: 4
 yolo:
   anchor: [10,13,  16,30,  33,23,  30,61,  62,45,  59,119,  116,90,  156,198,  373,326]
   classes: 80
